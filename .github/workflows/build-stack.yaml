@@ -1,0 +1,79 @@
+#
+# Copyright (C) 2025 Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: build-stack
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update podman
+        run: |
+          # ubuntu version from kubic repository to install podman we need (v5)
+          ubuntu_version='23.10'
+          sudo sh -c "echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list"
+          curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/Release.key" | sudo apt-key add -
+          # install necessary dependencies for criu package which is not part of 23.10
+          sudo apt-get install -qq libprotobuf32t64 python3-protobuf libnet1
+          # install criu manually from static location
+          curl -sLO http://cz.archive.ubuntu.com/ubuntu/pool/universe/c/criu/criu_3.16.1-2_amd64.deb && sudo dpkg -i criu_3.16.1-2_amd64.deb
+          sudo apt-get update -qq
+          sudo apt-get -qq -y install podman || { echo "Start fallback steps for podman nightly installation from a static mirror" && \
+            sudo sh -c "echo 'deb http://ftp.lysator.liu.se/pub/opensuse/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list" && \
+            curl -L "http://ftp.lysator.liu.se/pub/opensuse/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/Release.key" | sudo apt-key add - && \
+            sudo apt-get update && \
+            sudo apt-get -y install podman; }
+          podman version
+      - name: Revert unprivileged user namespace restrictions in Ubuntu 24.04
+        run: |
+          # allow unprivileged user namespace
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Set cgroup_manager to 'cgroupfs' instead of systemd
+        run: |
+          mkdir -p ~/.config/containers
+          cat <<EOT >> ~/.config/containers/containers.conf
+          [engine]
+          cgroup_manager="cgroupfs"
+          EOT
+          podman info
+
+      - name: build package
+        run: |
+          pip install --upgrade build
+          python -m build
+
+      - name: Login to ghcr.io
+        run: podman login --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
+
+      - name: Publish Image
+        id: publish-image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/podman-ai-lab-stack
+          IMAGE_NIGHTLY=${IMAGE_NAME}:nightly
+          IMAGE_SHA=${IMAGE_NAME}:${GITHUB_SHA}
+          podman build . -f build/Containerfile -t $IMAGE_NIGHTLY
+          podman push $IMAGE_NIGHTLY
+          podman tag $IMAGE_NIGHTLY $IMAGE_SHA
+          podman push $IMAGE_SHA

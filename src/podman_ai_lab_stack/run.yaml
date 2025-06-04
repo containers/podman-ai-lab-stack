@@ -15,7 +15,7 @@ providers:
   - provider_id: podman-ai-lab
     provider_type: remote::podman-ai-lab
     config:
-      url: ${env.PODMAN_AI_LAB_URL:http://localhost:10434}
+      url: ${env.PODMAN_AI_LAB_URL:http://host.containers.internal:10434}
   vector_io:
   - provider_id: faiss
     provider_type: inline::faiss
