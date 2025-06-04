@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, List, Optional, Union
+from typing import Any, AsyncGenerator, AsyncIterator, Dict, List, Optional, Union
 
 from ollama import AsyncClient
 
@@ -17,6 +17,10 @@ from llama_stack.apis.inference import (
     Inference,
     LogProbConfig,
     Message,
+    OpenAIChatCompletion,
+    OpenAIChatCompletionChunk,
+    OpenAIMessageParam,
+    OpenAIResponseFormatParam,
     ResponseFormat,
     SamplingParams,
     TextTruncation,
@@ -25,7 +29,11 @@ from llama_stack.apis.inference import (
     ToolDefinition,
     ToolPromptFormat,
 )
-from llama_stack.apis.models import Model
+from llama_stack.apis.inference.inference import (
+    OpenAICompletion,
+)
+
+from llama_stack.apis.models import Model, Models
 from llama_stack.log import get_logger
 from llama_stack.providers.datatypes import ModelsProtocolPrivate
 from llama_stack.providers.utils.inference.openai_compat import (
@@ -263,6 +271,57 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
     async def register_model(self, model: Model) -> Model:
         return model
 
+    async def openai_chat_completion(
+        self,
+        model: str,
+        messages: List[OpenAIMessageParam],
+        frequency_penalty: Optional[float] = None,
+        function_call: Optional[Union[str, Dict[str, Any]]] = None,
+        functions: Optional[List[Dict[str, Any]]] = None,
+        logit_bias: Optional[Dict[str, float]] = None,
+        logprobs: Optional[bool] = None,
+        max_completion_tokens: Optional[int] = None,
+        max_tokens: Optional[int] = None,
+        n: Optional[int] = None,
+        parallel_tool_calls: Optional[bool] = None,
+        presence_penalty: Optional[float] = None,
+        response_format: Optional[OpenAIResponseFormatParam] = None,
+        seed: Optional[int] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        stream: Optional[bool] = None,
+        stream_options: Optional[Dict[str, Any]] = None,
+        temperature: Optional[float] = None,
+        tool_choice: Optional[Union[str, Dict[str, Any]]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        top_logprobs: Optional[int] = None,
+        top_p: Optional[float] = None,
+        user: Optional[str] = None,
+    ) -> Union[OpenAIChatCompletion, AsyncIterator[OpenAIChatCompletionChunk]]:
+        pass
+
+    async def openai_completion(
+        self,
+        model: str,
+        prompt: Union[str, List[str], List[int], List[List[int]]],
+        best_of: Optional[int] = None,
+        echo: Optional[bool] = None,
+        frequency_penalty: Optional[float] = None,
+        logit_bias: Optional[Dict[str, float]] = None,
+        logprobs: Optional[bool] = None,
+        max_tokens: Optional[int] = None,
+        n: Optional[int] = None,
+        presence_penalty: Optional[float] = None,
+        seed: Optional[int] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        stream: Optional[bool] = None,
+        stream_options: Optional[Dict[str, Any]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        user: Optional[str] = None,
+        guided_choice: Optional[List[str]] = None,
+        prompt_logprobs: Optional[int] = None,
+    ) -> OpenAICompletion:
+        pass
 
 async def convert_message_to_openai_dict_for_podman_ai_lab(message: Message) -> List[dict]:
     async def _convert_content(content) -> dict:
@@ -283,6 +342,3 @@ async def convert_message_to_openai_dict_for_podman_ai_lab(message: Message) -> 
         return [await _convert_content(c) for c in message.content]
     else:
         return [await _convert_content(message.content)]
-
-async def register_model(self, model: Model) -> Model:
-    return model
