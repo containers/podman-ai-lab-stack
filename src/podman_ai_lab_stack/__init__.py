@@ -7,6 +7,6 @@ from .config import PodmanAILabImplConfig
 async def get_adapter_impl(config: PodmanAILabImplConfig, deps: Dict[Api, Any]):
     from .podman_ai_lab import PodmanAILabInferenceAdapter
 
-    impl = PodmanAILabInferenceAdapter(config.url, deps[Api.models])
+    impl = PodmanAILabInferenceAdapter(config.url)
     await impl.initialize()
     return impl

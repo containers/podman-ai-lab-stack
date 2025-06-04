@@ -1,3 +1,7 @@
 llama-stack>=0.2.7
 pydantic
 ollama
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+aiosqlite

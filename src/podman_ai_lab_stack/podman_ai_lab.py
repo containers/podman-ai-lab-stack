@@ -25,7 +25,7 @@ from llama_stack.apis.inference import (
     ToolDefinition,
     ToolPromptFormat,
 )
-from llama_stack.apis.models import Model, Models
+from llama_stack.apis.models import Model
 from llama_stack.log import get_logger
 from llama_stack.providers.datatypes import ModelsProtocolPrivate
 from llama_stack.providers.utils.inference.openai_compat import (
@@ -48,9 +48,8 @@ logger = get_logger(name=__name__, category="inference")
 
 
 class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
-    def __init__(self, url: str, models: Models) -> None:
+    def __init__(self, url: str) -> None:
         self.url = url
-        self.models = models
 
     @property
     def client(self) -> AsyncClient:
