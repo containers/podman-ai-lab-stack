@@ -1,0 +1,6 @@
+adapter:
+  adapter_type: podman-ai-lab
+  config_class: podman_ai_lab_stack.config.PodmanAILabImplConfig
+  module: podman_ai_lab_stack
+api_dependencies: []
+optional_api_dependencies: []
