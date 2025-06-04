@@ -1,0 +1,12 @@
+FROM registry.access.redhat.com/ubi9/python-311:1-77.1726664316
+
+RUN pip install fastapi
+RUN pip install --extra-index-url https://test.pypi.org/simple/ podman-ai-lab-stack==0.11.0
+RUN \
+  mkdir -p $HOME/.llama/providers.d/remote/inference && \
+  cp /opt/app-root/lib64/python3.11/site-packages/podman_ai_lab_stack/providers.d/remote/inference/podman-ai-lab.yaml \
+    $HOME/.llama/providers.d/remote/inference/
+
+EXPOSE 8321
+
+ENTRYPOINT [ "llama", "stack", "run", "/opt/app-root/lib64/python3.11/site-packages/podman_ai_lab_stack/run.yaml" ]

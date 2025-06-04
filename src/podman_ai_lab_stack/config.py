@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
-DEFAULT_PODMAN_AI_LAB_URL = "http://localhost:10434"
+DEFAULT_PODMAN_AI_LAB_URL = "http://host.containers.internal:10434"
 
 
 class PodmanAILabImplConfig(BaseModel):
@@ -10,6 +10,6 @@ class PodmanAILabImplConfig(BaseModel):
 
     @classmethod
     def sample_run_config(
-        cls, url: str = "${env.PODMAN_AI_LAB_URL:http://localhost:10434}", **kwargsi
+        cls, url: str = "${env.PODMAN_AI_LAB_URL:http://host.containers.internal:10434}", **kwargsi
     ) -> Dict[str, Any]:
         return {"url": url}

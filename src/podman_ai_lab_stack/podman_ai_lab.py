@@ -67,8 +67,6 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
         logger.info(f"checking connectivity to Podman AI Lab at `{self.url}`...")
         try:
             await self.client.list()
-            # for model in response["models"]:
-            #    await self.models.register_model(model.model, model.model, 'podman-ai-lab')
         except ConnectionError as e:
             raise RuntimeError("Podman AI Lab Server is not running, start it using Podman Desktop") from e
 
