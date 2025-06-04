@@ -1,7 +1,15 @@
-llama-stack>=0.2.7
+llama-stack>=0.2.9
 pydantic
 ollama
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-otlp
 aiosqlite
+fastapi
+datasets
+blobfile
+faiss-cpu
+mcp
+autoevals
+sqlalchemy
+greenlet
