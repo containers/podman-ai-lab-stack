@@ -73,7 +73,7 @@ jobs:
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/podman-ai-lab-stack
           IMAGE_NIGHTLY=${IMAGE_NAME}:nightly
           IMAGE_SHA=${IMAGE_NAME}:${GITHUB_SHA}
-          podman build . -f build/Containerfile -t $IMAGE_NIGHTLY
-          podman push $IMAGE_NIGHTLY
-          podman tag $IMAGE_NIGHTLY $IMAGE_SHA
-          podman push $IMAGE_SHA
+          podman manifest create ${IMAGE_NIGHTLY}
+          podman build --platform linux/amd64,linux/arm64 . -f build/Containerfile --manifest ${IMAGE_NIGHTLY}
+          podman manifest push ${IMAGE_NIGHTLY} docker://${IMAGE_NIGHTLY}
+          podman manifest push ${IMAGE_NIGHTLY} docker://${IMAGE_SHA}
