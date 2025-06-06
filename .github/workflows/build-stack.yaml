@@ -29,44 +29,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Update podman
+      - name: build package
         run: |
-          # ubuntu version from kubic repository to install podman we need (v5)
-          ubuntu_version='23.10'
-          sudo sh -c "echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list"
-          curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/Release.key" | sudo apt-key add -
-          # install necessary dependencies for criu package which is not part of 23.10
-          sudo apt-get install -qq libprotobuf32t64 python3-protobuf libnet1
-          # install criu manually from static location
-          curl -sLO http://cz.archive.ubuntu.com/ubuntu/pool/universe/c/criu/criu_3.16.1-2_amd64.deb && sudo dpkg -i criu_3.16.1-2_amd64.deb
-          sudo apt-get update -qq
-          sudo apt-get -qq -y install podman || { echo "Start fallback steps for podman nightly installation from a static mirror" && \
-            sudo sh -c "echo 'deb http://ftp.lysator.liu.se/pub/opensuse/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list" && \
-            curl -L "http://ftp.lysator.liu.se/pub/opensuse/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_${ubuntu_version}/Release.key" | sudo apt-key add - && \
-            sudo apt-get update && \
-            sudo apt-get -y install podman; }
-          podman version
+          pip install --upgrade build
+          python -m build
 
       - name: Install qemu dependency
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
 
-      - name: build package
-        run: |
-          pip install --upgrade build
-          python -m build
+      - name: build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: podman-ai-lab-stack
+          tags: nightly ${{ github.sha }}
+          platforms: linux/amd64, linux/arm64
+          containerfiles: |
+            build/Containerfile
+          context: .
+          oci: true
 
-      - name: Login to ghcr.io
-        run: podman login --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
 
-      - name: Publish Image
-        id: publish-image
-        run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/podman-ai-lab-stack
-          IMAGE_NIGHTLY=${IMAGE_NAME}:nightly
-          IMAGE_SHA=${IMAGE_NAME}:${GITHUB_SHA}
-          podman manifest create ${IMAGE_NIGHTLY}
-          podman build --platform linux/amd64,linux/arm64 . -f build/Containerfile --manifest ${IMAGE_NIGHTLY}
-          podman manifest push ${IMAGE_NIGHTLY} docker://${IMAGE_NIGHTLY}
-          podman manifest push ${IMAGE_NIGHTLY} docker://${IMAGE_SHA}
+      - name: publish image to ghcr.io
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
