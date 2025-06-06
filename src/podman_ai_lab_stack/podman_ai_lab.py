@@ -37,6 +37,7 @@ from llama_stack.apis.inference import (
     Message,
     OpenAIChatCompletion,
     OpenAIChatCompletionChunk,
+    OpenAIEmbeddingsResponse,
     OpenAIMessageParam,
     OpenAIResponseFormatParam,
     ResponseFormat,
@@ -64,7 +65,6 @@ from llama_stack.providers.utils.inference.openai_compat import (
     process_completion_stream_response,
 )
 from llama_stack.providers.utils.inference.prompt_adapter import (
-    chat_completion_request_to_prompt,
     completion_request_to_prompt,
     convert_image_content_to_url,
     request_has_media,
@@ -306,6 +306,16 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
         user: Optional[str] = None,
     ) -> Union[OpenAIChatCompletion, AsyncIterator[OpenAIChatCompletionChunk]]:
         pass
+
+    async def openai_embeddings(
+        self,
+        model: str,
+        input: str | list[str],
+        encoding_format: str | None = "float",
+        dimensions: int | None = None,
+        user: str | None = None,
+    ) -> OpenAIEmbeddingsResponse:
+        raise NotImplementedError()
 
     async def openai_completion(
         self,
