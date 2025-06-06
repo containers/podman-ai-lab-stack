@@ -190,18 +190,10 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
 
         input_dict = {}
         media_present = request_has_media(request)
-        llama_model = request.model
         if isinstance(request, ChatCompletionRequest):
-            if media_present or not llama_model:
-                contents = [await convert_message_to_openai_dict_for_podman_ai_lab(m) for m in request.messages]
-                # flatten the list of lists
-                input_dict["messages"] = [item for sublist in contents for item in sublist]
-            else:
-                input_dict["raw"] = True
-                input_dict["prompt"] = await chat_completion_request_to_prompt(
-                    request,
-                    llama_model,
-                )
+            contents = [await convert_message_to_openai_dict_for_podman_ai_lab(m) for m in request.messages]
+            # flatten the list of lists
+            input_dict["messages"] = [item for sublist in contents for item in sublist]
         else:
             assert not media_present, "Ollama does not support media for Completion requests"
             input_dict["prompt"] = await completion_request_to_prompt(request)
