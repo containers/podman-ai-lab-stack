@@ -31,8 +31,8 @@ jobs:
 
       - name: build package
         run: |
-          pip install --upgrade build
-          python -m build
+          pip install --upgrade uv
+          uv build
 
       - name: Install qemu dependency
         run: |

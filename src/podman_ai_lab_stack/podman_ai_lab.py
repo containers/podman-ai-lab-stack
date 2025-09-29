@@ -305,7 +305,7 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
         top_p: Optional[float] = None,
         user: Optional[str] = None,
     ) -> Union[OpenAIChatCompletion, AsyncIterator[OpenAIChatCompletionChunk]]:
-        pass
+        raise NotImplementedError()
 
     async def openai_embeddings(
         self,
@@ -320,26 +320,27 @@ class PodmanAILabInferenceAdapter(Inference, ModelsProtocolPrivate):
     async def openai_completion(
         self,
         model: str,
-        prompt: Union[str, List[str], List[int], List[List[int]]],
-        best_of: Optional[int] = None,
-        echo: Optional[bool] = None,
-        frequency_penalty: Optional[float] = None,
-        logit_bias: Optional[Dict[str, float]] = None,
-        logprobs: Optional[bool] = None,
-        max_tokens: Optional[int] = None,
-        n: Optional[int] = None,
-        presence_penalty: Optional[float] = None,
-        seed: Optional[int] = None,
-        stop: Optional[Union[str, List[str]]] = None,
-        stream: Optional[bool] = None,
-        stream_options: Optional[Dict[str, Any]] = None,
-        temperature: Optional[float] = None,
-        top_p: Optional[float] = None,
-        user: Optional[str] = None,
-        guided_choice: Optional[List[str]] = None,
-        prompt_logprobs: Optional[int] = None,
+        prompt: str | list[str] | list[int] | list[list[int]],
+        best_of: int | None = None,
+        echo: bool | None = None,
+        frequency_penalty: float | None = None,
+        logit_bias: dict[str, float] | None = None,
+        logprobs: bool | None = None,
+        max_tokens: int | None = None,
+        n: int | None = None,
+        presence_penalty: float | None = None,
+        seed: int | None = None,
+        stop: str | list[str] | None = None,
+        stream: bool | None = None,
+        stream_options: dict[str, Any] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        user: str | None = None,
+        guided_choice: list[str] | None = None,
+        prompt_logprobs: int | None = None,
+        suffix: str | None = None,
     ) -> OpenAICompletion:
-        pass
+        raise NotImplementedError("Podman AI Lab does not implement OpenAI completion")
 
 async def convert_message_to_openai_dict_for_podman_ai_lab(message: Message) -> List[dict]:
     async def _convert_content(content) -> dict:

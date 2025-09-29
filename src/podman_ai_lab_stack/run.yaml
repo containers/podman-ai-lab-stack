@@ -16,6 +16,9 @@ providers:
     provider_type: remote::podman-ai-lab
     config:
       url: ${env.PODMAN_AI_LAB_URL:http://host.containers.internal:10434}
+  - provider_id: sentence-transformers
+    provider_type: inline::sentence-transformers
+    config: {}
   vector_io:
   - provider_id: faiss
     provider_type: inline::faiss
@@ -105,7 +108,12 @@ providers:
 metadata_store:
   type: sqlite
   db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/podman-ai-lab}/registry.db
-models: []
+models:
+- metadata:
+    embedding_dimension: 384
+  model_id: all-MiniLM-L6-v2
+  provider_id: sentence-transformers
+  model_type: embedding
 shields: []
 vector_dbs: []
 datasets: []

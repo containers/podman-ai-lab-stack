@@ -4,7 +4,7 @@ WORKDIR /opt/app-root/src
 
 COPY dist dist
 
-RUN pip install ./dist/podman_ai_lab_stack-0.12.0.tar.gz
+RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu/ ./dist/podman_ai_lab_stack-0.12.0.tar.gz
 RUN \
   mkdir -p $HOME/.llama/providers.d/remote/inference && \
   cp /opt/app-root/lib64/python3.11/site-packages/podman_ai_lab_stack/providers.d/remote/inference/podman-ai-lab.yaml \
