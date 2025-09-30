@@ -296,6 +296,8 @@ pydantic-settings==2.11.0
     # via mcp
 pygments==2.19.2
     # via rich
+pypdf==6.1.1
+    # via podman-ai-lab-stack
 python-dateutil==2.9.0.post0
     # via pandas
 python-dotenv==1.1.1
@@ -432,6 +434,7 @@ typing-extensions==4.15.0
     #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
+    #   pypdf
     #   referencing
     #   sentence-transformers
     #   sqlalchemy
